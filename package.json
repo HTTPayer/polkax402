@@ -1,0 +1,77 @@
+{
+  "name": "dotx402",
+  "version": "1.0.0",
+  "description": "Typescript SDK for x402 on Polkadot",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "account:generate": "node scripts/generate-account.js",
+    "account:inspect": "node scripts/inspect-account.js",
+    "account:balance": "node scripts/check-balance.js",
+    "contract:build": "cd contracts && cargo contract build --release",
+    "contract:test": "cd contracts && cargo test",
+    "contract:deploy": "node scripts/deploy-contract.js",
+    "contract:deploy:paseo": "cross-env DEPLOY_NETWORK=paseo node scripts/deploy-contract.js",
+    "contract:deploy:shibuya": "cross-env DEPLOY_NETWORK=shibuya node scripts/deploy-contract.js",
+    "facilitator": "node dist/examples/facilitator-local.js",
+    "server": "node dist/examples/server-simple.js",
+    "client": "node dist/examples/client-simple.js",
+    "dev": "npm run build && concurrently \"npm:facilitator\" \"npm:server\"",
+    "example:full": "npm run build && npm run facilitator & npm run server & sleep 3 && npm run client"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HTTPayer/dotx402.git"
+  },
+  "keywords": [
+    "x402",
+    "polkadot",
+    "payment",
+    "http",
+    "substrate"
+  ],
+  "author": "HTTPayer",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HTTPayer/dotx402/issues"
+  },
+  "homepage": "https://github.com/HTTPayer/dotx402#readme",
+  "dependencies": {
+    "@polkadot/api": "^16.5.2",
+    "@polkadot/api-contract": "^16.5.2",
+    "@polkadot/keyring": "^13.2.3",
+    "@polkadot/util": "^13.2.3",
+    "@polkadot/util-crypto": "^13.2.3",
+    "claude": "^0.1.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "cross-env": "^10.1.0",
+    "typescript": "^5.7.2"
+  }
+}
