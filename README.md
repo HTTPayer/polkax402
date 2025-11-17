@@ -61,10 +61,6 @@ npm run account:balance -- --network westend Alice
 
 See [CLI.md](./CLI.md) for complete CLI documentation.
 
-**Need testnet tokens?**
-- Paseo (recommended): See [PASEO.md](./PASEO.md)
-- Westend/Rococo: See [TESTNET_FAUCETS.md](./TESTNET_FAUCETS.md)
-
 ## Quick Start
 
 ### Client Usage
@@ -315,7 +311,7 @@ The X-Payment header contains a base64-encoded JSON object:
     "signature": "0x...",
     "signerPublicKey": "5Gj..."
   },
-  "asset": "DOT"
+  "asset": "5CR7oWebzRjmYrACqiYhh4G7vX4yZnCxT4ZaucYU9mCNvXGM" 
 }
 ```
 
@@ -355,31 +351,7 @@ docker-compose down
 - **Facilitator**: http://localhost:4000
 - **Explorer**: http://localhost:5000
 
-For complete Docker deployment guide, see [DOCKER.md](./DOCKER.md)
-
-## Security Considerations
-
-- **Never hardcode private keys** - Use environment variables or secure key management
-- **Validate payment amounts** - Always set `maxPayment` to prevent overpaying
-- **Check network** - Ensure you're on the correct network (mainnet vs testnet)
-- **Verify signatures** - Server must validate signatures before granting access
-- **Use HTTPS** - Always use encrypted connections for API calls
-
 ## License
 
-ISC
+TBA
 
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
-
-## Related Projects
-
-- [x402-fetch](https://www.npmjs.com/package/x402-fetch) - X402 client for EVM chains
-- [x402-express](https://www.npmjs.com/package/x402-express) - X402 server for Express.js
-- [HTTPayer](https://github.com/HTTPayer) - HTTP payment protocol infrastructure
-
-## Support
-
-- GitHub Issues: https://github.com/HTTPayer/polkax402/issues
-- X402 Spec: [Coming soon]
