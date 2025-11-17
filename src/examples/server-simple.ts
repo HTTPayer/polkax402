@@ -30,11 +30,11 @@ app.get('/health', (_req, res) => {
 
 // Create X402 middleware for protected routes
 const x402 = createX402Middleware({
-  network: (process.env.NETWORK as any) || 'local', // Use env var for network (local = substrate-contracts-node)
+  network: (process.env.NETWORK as any) || 'dotx402', // Use env var for network
   recipientAddress: process.env.RECIPIENT_ADDRESS || '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
-  pricePerRequest: process.env.PRICE_PER_REQUEST || '1000000000000', // 1 UNIT
+  pricePerRequest: process.env.PRICE_PER_REQUEST || '10000000000', // .001 UNIT
   asset: process.env.CONTRACT_ADDRESS || '5CR7oWebzRjmYrACqiYhh4G7vX4yZnCxT4ZaucYU9mCNvXGM', // HTTPUSD contract address
-  facilitatorUrl: process.env.FACILITATOR_URL || 'http://localhost:4000/execute',
+  facilitatorUrl: process.env.FACILITATOR_URL || 'http://localhost:4000/settle',
   requireFacilitatorConfirmation: true, // Server forwards to facilitator for on-chain execution
   maxPaymentAge: 300000, // 5 minutes
   resourceDescription: 'Premium API data access',
@@ -66,7 +66,7 @@ app.get('/api/premium/data', x402, (req, res) => {
 // Protected route with dynamic pricing
 app.get('/api/premium/compute',
   createX402Middleware({
-    network: (process.env.NETWORK as any) || 'local', // Use env var for network (local = substrate-contracts-node)
+    network: (process.env.NETWORK as any) || 'dotx402', // Use env var for network
     recipientAddress: process.env.RECIPIENT_ADDRESS || '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
     pricePerRequest: (req) => {
       // Price based on query parameter

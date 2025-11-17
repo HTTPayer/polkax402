@@ -23,6 +23,7 @@ const PORT = parseInt(process.env.PORT || '4000', 10);
 const WS_ENDPOINT = process.env.WS_ENDPOINT || 'ws://localhost:9944';
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 const FACILITATOR_SEED = process.env.FACILITATOR_SEED || '//Alice';
+const NETWORK = process.env.NETWORK || "dotx402"
 
 if (!CONTRACT_ADDRESS) {
   throw new Error('CONTRACT_ADDRESS not set in .env file');
@@ -103,8 +104,13 @@ async function main() {
     }
   });
 
+  // Verify a payment auth
+  // app.post('/verify', async (req, res)=> {
+
+  // };)
+
   // Execute payment endpoint
-  app.post('/execute', async (req, res) => {
+  app.post('/settle', async (req, res) => {
     const payment = req.body as PaymentRequest;
 
     console.log('\n💳 Payment request received:');
@@ -248,11 +254,12 @@ async function main() {
   app.listen(PORT, () => {
     console.log('🚀 X402 Facilitator Service - LIVE');
     console.log(`📡 Listening:  http://localhost:${PORT}`);
+    console.log(`🌐 Network:    ${NETWORK}`)
     console.log(`📝 Contract:   ${CONTRACT_ADDRESS}`);
     console.log(`👤 Facilitator: ${facilitatorAccount.address}`);
     console.log(`\n💡 Endpoints:`);
     console.log(`   GET  /health  - Health check`);
-    console.log(`   POST /execute - Execute payment\n`);
+    console.log(`   POST /settle - Settle payment\n`);
   });
 }
 

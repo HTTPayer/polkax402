@@ -8,12 +8,12 @@ dotenv.config();
 
 // Network configurations
 const NETWORKS = {
-  local: 'ws://localhost:9944',
+  dotx402: 'wss://bov424mc35ckd0qqjgd7cb6888.ingress.akash-palmito.org', // dotx402 network (deployed on Akash)
   paseo: 'wss://paseo-rpc.dwellir.com', // Paseo testnet (Polkadot contracts testnet)
   shibuya: 'wss://rpc.shibuya.astar.network', // Astar Shibuya testnet
 };
 
-const WS_ENDPOINT = process.env.DEPLOY_ENDPOINT || NETWORKS[process.env.DEPLOY_NETWORK] || NETWORKS.local;
+const WS_ENDPOINT = process.env.DEPLOY_ENDPOINT || NETWORKS[process.env.DEPLOY_NETWORK] || NETWORKS.dotx402;
 const DEPLOYER_SEED = process.env.DEPLOYER_SEED || '//Alice';
 
 async function main() {

@@ -8,6 +8,7 @@ import type {
   FetchFunction,
   X402PaymentRequired,
   PolkadotNetwork,
+  PolkadotSigner,
 } from '../types/index.js';
 import {
   createPaymentHeader,
@@ -15,25 +16,31 @@ import {
 } from '../utils/payment.js';
 
 /**
- * Wrap fetch with automatic X402 payment handling
+ * Wrap fetch with automatic X402 payment handling (simple API)
  *
- * Usage:
+ * @example
  * ```typescript
- * import { wrapFetchWithPayment } from 'dotx402/client';
+ * import { Keyring } from '@polkadot/keyring';
+ * import { wrapFetchWithPayment, createPolkadotSigner } from 'dotx402';
  *
- * const fetchWithPay = wrapFetchWithPayment(fetch, {
- *   signer: polkadotSigner,
- *   network: 'polkadot',
- *   maxPayment: '1000000000000' // 1 DOT in planck
- * });
+ * const keyring = new Keyring({ type: 'sr25519' });
+ * const account = keyring.addFromUri('//Bob');
+ * const signer = createPolkadotSigner(account);
  *
+ * const fetchWithPay = wrapFetchWithPayment(fetch, signer);
  * const response = await fetchWithPay('https://api.example.com/data');
  * ```
  */
 export function wrapFetchWithPayment(
   fetchFn: FetchFunction,
-  config: WrapFetchConfig
+  signerOrConfig: PolkadotSigner | WrapFetchConfig
 ): PaymentFetch {
+  // Normalize input to config format
+  const config: WrapFetchConfig =
+    'sign' in signerOrConfig
+      ? { signer: signerOrConfig }
+      : signerOrConfig;
+
   const {
     signer,
     network,
@@ -50,23 +57,23 @@ export function wrapFetchWithPayment(
 
     // Check if payment is required
     if (response.status === 402) {
-      const paymentRequiredHeader = response.headers.get('X-Payment-Required');
-
-      if (!paymentRequiredHeader) {
-        throw new Error(
-          'Received 402 status but no X-Payment-Required header found'
-        );
-      }
-
-      // Parse payment requirements
-      let paymentRequired: X402PaymentRequired;
+      // Parse payment requirements from response body (X402 spec)
+      let responseBody: any;
       try {
-        paymentRequired = parsePaymentRequired(paymentRequiredHeader);
+        responseBody = await response.json();
       } catch (error) {
         throw new Error(
-          `Failed to parse X-Payment-Required header: ${error instanceof Error ? error.message : String(error)}`
+          `Failed to parse 402 response body: ${error instanceof Error ? error.message : String(error)}`
         );
       }
+
+      // X402 spec: response body has { x402Version, accepts: [...], error? }
+      if (!responseBody.accepts || !Array.isArray(responseBody.accepts) || responseBody.accepts.length === 0) {
+        throw new Error('Invalid X402 Payment Required response: missing accepts array');
+      }
+
+      // Use the first payment option from accepts array
+      const paymentRequired: X402PaymentRequired = responseBody.accepts[0];
 
       // Validate payment amount if maxPayment is set
       if (maxPayment) {
@@ -113,6 +120,38 @@ export function wrapFetchWithPayment(
     }
 
     return response;
+  };
+}
+
+/**
+ * Creates a Polkadot signer from a Keyring account
+ *
+ * This is a helper function to simplify creating signers from Polkadot accounts.
+ * The signer handles message hashing and signing in the format expected by the
+ * X402 smart contract.
+ *
+ * @example
+ * ```typescript
+ * import { Keyring } from '@polkadot/keyring';
+ * import { createPolkadotSigner } from 'dotx402';
+ *
+ * const keyring = new Keyring({ type: 'sr25519' });
+ * const account = keyring.addFromUri('//Bob');
+ * const signer = createPolkadotSigner(account);
+ * ```
+ */
+export function createPolkadotSigner(account: any): PolkadotSigner {
+  return {
+    address: account.address,
+    sign: async (payload: string | Uint8Array) => {
+      const { blake2AsU8a } = await import('@polkadot/util-crypto');
+      const message = typeof payload === 'string'
+        ? Buffer.from(payload, 'hex')
+        : payload;
+      const hash = blake2AsU8a(message, 256);
+      const signature = account.sign(hash);
+      return { signature: `0x${Buffer.from(signature).toString('hex')}` };
+    },
   };
 }
 

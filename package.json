@@ -39,6 +39,7 @@
     "facilitator": "node dist/examples/facilitator-local.js",
     "server": "node dist/examples/server-simple.js",
     "client": "node dist/examples/client-simple.js",
+    "explorer": "node dist/explorer/api.js",
     "dev": "npm run build && concurrently \"npm:facilitator\" \"npm:server\"",
     "example:full": "npm run build && npm run facilitator & npm run server & sleep 3 && npm run client"
   },

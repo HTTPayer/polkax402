@@ -42,6 +42,6 @@ notes.txt
 .claude/
 
 docs/
-README.md
 
 deploy-akash.yaml
+docker-compose.yaml

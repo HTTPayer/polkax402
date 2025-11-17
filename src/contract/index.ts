@@ -110,7 +110,7 @@ export async function getFacilitatorFee(
  * Network configurations for common Polkadot networks
  */
 export const NETWORK_CONFIGS: Record<PolkadotNetwork, { wsEndpoint: string }> = {
-  local: { wsEndpoint: 'ws://localhost:9944' },
+  dotx402: { wsEndpoint: 'wss://bov424mc35ckd0qqjgd7cb6888.ingress.akash-palmito.org' },
   polkadot: { wsEndpoint: 'wss://rpc.polkadot.io' },
   kusama: { wsEndpoint: 'wss://kusama-rpc.polkadot.io' },
   westend: { wsEndpoint: 'wss://westend-rpc.polkadot.io' },

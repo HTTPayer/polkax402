@@ -8,6 +8,7 @@
 // Re-export client functionality
 export {
   wrapFetchWithPayment,
+  createPolkadotSigner,
   createPaymentHeader,
   parsePaymentRequired,
 } from './client/index.js';

@@ -6,7 +6,7 @@
  * Supported Polkadot networks
  */
 export type PolkadotNetwork =
-  | 'local'              // Local development node (substrate-contracts-node)
+  | 'dotx402'            // dotx402 network (deployed on Akash)
   | 'polkadot'           // Polkadot mainnet
   | 'kusama'             // Kusama canary network
   | 'westend'            // Westend testnet

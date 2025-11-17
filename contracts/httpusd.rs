@@ -49,7 +49,7 @@ mod httpusd {
 
     /// httpusd Storage
     #[ink(storage)]
-    pub struct httpusd {
+    pub struct Httpusd {
         /// Total supply of httpusd
         total_supply: Balance,
         /// Token balances
@@ -101,7 +101,7 @@ mod httpusd {
         nonce: String,
     }
 
-    impl httpusd {
+    impl Httpusd {
         /// Constructor
         #[ink(constructor)]
         pub fn new(initial_supply: Balance, facilitator_fee_bps: u16) -> Self {
@@ -390,7 +390,7 @@ mod httpusd {
         #[ink::test]
         fn new_works() {
             let initial_supply = 1_000_000_000_000; // 1 trillion
-            let contract = httpusd::new(initial_supply, 100); // 1% fee
+            let contract = Httpusd::new(initial_supply, 100); // 1% fee
             assert_eq!(contract.total_supply(), initial_supply);
             assert_eq!(contract.get_facilitator_fee(), 100);
         }
@@ -398,7 +398,7 @@ mod httpusd {
         #[ink::test]
         fn nonce_tracking_works() {
             let initial_supply = 1_000_000_000_000;
-            let mut contract = httpusd::new(initial_supply, 100);
+            let mut contract = Httpusd::new(initial_supply, 100);
             let account = AccountId::from([0x02; 32]);
             let nonce = String::from("test-nonce-123");
 
