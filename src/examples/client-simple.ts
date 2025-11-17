@@ -14,6 +14,7 @@ import {
   encodePaymentHeader,
   parsePaymentRequired,
 } from '../utils/payment.js';
+import { secureFetch } from '../utils/fetch-wrapper.js';
 import type { PolkadotSigner, X402PaymentRequired } from '../types/index.js';
 import dotenv from 'dotenv';
 
@@ -36,7 +37,7 @@ async function makeProtectedRequest(
   try {
     // Step 1: Make initial request
     console.log('1️⃣  Making initial request...');
-    let response = await fetch(endpoint);
+    let response = await secureFetch(endpoint);
 
     // Check if payment is required
     if (response.status !== 402) {
@@ -86,7 +87,7 @@ async function makeProtectedRequest(
     console.log('4️⃣  Retrying request with payment authorization...');
     const paymentHeader = encodePaymentHeader(x402Payment);
 
-    response = await fetch(endpoint, {
+    response = await secureFetch(endpoint, {
       headers: {
         'X-Payment': paymentHeader,
       },

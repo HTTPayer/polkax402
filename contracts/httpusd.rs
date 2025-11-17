@@ -129,6 +129,12 @@ mod httpusd {
             self.total_supply
         }
 
+        /// Returns the number of decimals for the token
+        #[ink(message)]
+        pub fn decimals(&self) -> u8 {
+            12
+        }
+
         /// Returns the balance of an account
         #[ink(message)]
         pub fn balance_of(&self, owner: AccountId) -> Balance {

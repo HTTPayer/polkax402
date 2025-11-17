@@ -7,13 +7,13 @@
 
 import { Keyring } from '@polkadot/keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-import { wrapFetchWithPayment, createPolkadotSigner } from '../index.js';
+import { wrapFetchWithPayment, createPolkadotSigner } from './index.js';
 import dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config();
 
-const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3000';
+const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
 const NETWORK = process.env.NETWORK || 'polkax402';
 
 /**
@@ -49,23 +49,23 @@ async function main() {
   console.log('\n📋 TEST 2: Protected endpoint');
   console.log('━'.repeat(60));
   try {
-    const response = await fetchWithPay(`${SERVER_URL}/api/premium/data`);
+    const response = await fetchWithPay(`${SERVER_URL}/api/polka-news`);
     const data = await response.json();
     console.log('✅ Success! Response:', JSON.stringify(data, null, 2));
   } catch (error) {
     console.error('❌ Error:', error instanceof Error ? error.message : String(error));
   }
 
-  // Test 3: Dynamic pricing endpoint
-  console.log('\n📋 TEST 3: Dynamic pricing endpoint (complexity=1)');
-  console.log('━'.repeat(60));
-  try {
-    const response = await fetchWithPay(`${SERVER_URL}/api/premium/compute?complexity=1`);
-    const data = await response.json();
-    console.log('✅ Success! Response:', JSON.stringify(data, null, 2));
-  } catch (error) {
-    console.error('❌ Error:', error instanceof Error ? error.message : String(error));
-  }
+//   // Test 3: Dynamic pricing endpoint
+//   console.log('\n📋 TEST 3: Dynamic pricing endpoint (complexity=1)');
+//   console.log('━'.repeat(60));
+//   try {
+//     const response = await fetchWithPay(`${SERVER_URL}/api/premium/compute?complexity=1`);
+//     const data = await response.json();
+//     console.log('✅ Success! Response:', JSON.stringify(data, null, 2));
+//   } catch (error) {
+//     console.error('❌ Error:', error instanceof Error ? error.message : String(error));
+//   }
 
   console.log('\n✅ All tests complete!\n');
 }

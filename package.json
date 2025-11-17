@@ -3,28 +3,47 @@
   "version": "1.0.0",
   "description": "Typescript SDK for x402 on Polkadot",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./client": {
-      "types": "./dist/client/index.d.ts",
-      "import": "./dist/client/index.js"
+      "import": {
+        "types": "./dist/client/index.d.ts",
+        "default": "./dist/client/index.js"
+      },
+      "require": {
+        "types": "./dist/client/index.d.cts",
+        "default": "./dist/client/index.cjs"
+      }
     },
     "./server": {
-      "types": "./dist/server/index.d.ts",
-      "import": "./dist/server/index.js"
+      "import": {
+        "types": "./dist/server/index.d.ts",
+        "default": "./dist/server/index.js"
+      },
+      "require": {
+        "types": "./dist/server/index.d.cts",
+        "default": "./dist/server/index.cjs"
+      }
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc --watch",
+    "build": "tsup",
+    "watch": "tsup --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -36,10 +55,10 @@
     "contract:deploy": "node scripts/deploy-contract.js",
     "contract:deploy:paseo": "cross-env DEPLOY_NETWORK=paseo node scripts/deploy-contract.js",
     "contract:deploy:shibuya": "cross-env DEPLOY_NETWORK=shibuya node scripts/deploy-contract.js",
-    "facilitator": "node dist/examples/facilitator-local.js",
-    "server": "node dist/examples/server-simple.js",
-    "client": "node dist/examples/client-simple.js",
-    "explorer": "node dist/explorer/api.js",
+    "facilitator": "tsx src/examples/facilitator-local.ts",
+    "server": "tsx src/examples/server-simple.ts",
+    "client": "tsx src/examples/client-simple.ts",
+    "explorer": "tsx src/explorer/api.ts",
     "dev": "npm run build && concurrently \"npm:facilitator\" \"npm:server\"",
     "example:full": "npm run build && npm run facilitator & npm run server & sleep 3 && npm run client"
   },
@@ -63,16 +82,20 @@
   "dependencies": {
     "@polkadot/api": "^16.5.2",
     "@polkadot/api-contract": "^16.5.2",
-    "@polkadot/keyring": "^13.2.3",
-    "@polkadot/util": "^13.2.3",
-    "@polkadot/util-crypto": "^13.2.3",
+    "@polkadot/keyring": "^13.5.8",
+    "@polkadot/util": "^13.5.8",
+    "@polkadot/util-crypto": "^13.5.8",
     "claude": "^0.1.1",
     "dotenv": "^16.4.5",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/swagger-ui-express": "^4.1.8",
     "cross-env": "^10.1.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.20.6",
     "typescript": "^5.7.2"
   }
 }

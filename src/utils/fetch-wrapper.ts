@@ -5,8 +5,67 @@
  * with Polkadot/Substrate accounts.
  */
 
+import https from 'https';
+import http from 'http';
 import type { PolkadotSigner, X402PaymentRequired } from '../types/index.js';
 import { createPaymentHeader } from './payment.js';
+
+/**
+ * Custom fetch that handles self-signed SSL certificates
+ * Uses Node.js native https module for better control over SSL
+ */
+export async function secureFetch(url: string | URL, options?: RequestInit): Promise<Response> {
+  const urlString = url.toString();
+
+  // For non-HTTPS URLs, use standard fetch
+  if (!urlString.startsWith('https://')) {
+    return fetch(url, options);
+  }
+
+  // For HTTPS URLs with self-signed certs, use a custom implementation
+  return new Promise((resolve, reject) => {
+    const parsedUrl = new URL(urlString);
+    const requestOptions: https.RequestOptions = {
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port || 443,
+      path: parsedUrl.pathname + parsedUrl.search,
+      method: options?.method || 'GET',
+      headers: options?.headers as any,
+      rejectUnauthorized: false, // Allow self-signed certificates
+    };
+
+    const req = https.request(requestOptions, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        // Create a Response-like object
+        const response = new Response(data, {
+          status: res.statusCode || 200,
+          statusText: res.statusMessage || 'OK',
+          headers: new Headers(res.headers as any),
+        });
+        resolve(response);
+      });
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    // Send request body if present
+    if (options?.body) {
+      if (typeof options.body === 'string') {
+        req.write(options.body);
+      } else if (Buffer.isBuffer(options.body)) {
+        req.write(options.body);
+      }
+    }
+
+    req.end();
+  });
+}
 
 export interface FetchWithPaymentOptions extends RequestInit {
   /**
@@ -55,8 +114,8 @@ export function wrapFetchWithPayment(
   return async (input: RequestInfo | URL, init?: FetchWithPaymentOptions): Promise<Response> => {
     const { validityMinutes = 5, x402Version = 1, ...fetchOptions } = init || {};
 
-    // Make initial request
-    let response = await fetchFn(input, fetchOptions);
+    // Make initial request using secureFetch
+    let response = await secureFetch(input.toString(), fetchOptions);
 
     // If not a 402, return immediately
     if (response.status !== 402) {
@@ -89,7 +148,7 @@ export function wrapFetchWithPayment(
       const headers = new Headers(fetchOptions.headers);
       headers.set('X-Payment', paymentHeader);
 
-      response = await fetchFn(input, {
+      response = await secureFetch(input.toString(), {
         ...fetchOptions,
         headers,
       });

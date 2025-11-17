@@ -23,7 +23,7 @@ const PORT = parseInt(process.env.PORT || '4000', 10);
 const WS_ENDPOINT = process.env.WS_ENDPOINT || 'ws://localhost:9944';
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 const FACILITATOR_SEED = process.env.FACILITATOR_SEED || '//Alice';
-const NETWORK = process.env.NETWORK || "dotx402"
+const NETWORK = process.env.NETWORK || "polkax402"
 
 if (!CONTRACT_ADDRESS) {
   throw new Error('CONTRACT_ADDRESS not set in .env file');
@@ -90,6 +90,7 @@ async function main() {
       res.json({
         ok: true,
         chain: chain.toString(),
+        network: NETWORK,
         version: version.toString(),
         facilitator: facilitatorAccount.address,
         contract: CONTRACT_ADDRESS,
@@ -111,13 +112,19 @@ async function main() {
 
   // Execute payment endpoint
   app.post('/settle', async (req, res) => {
+    console.log('\n💳 Payment request received (RAW):');
+    console.log('   Full body:', JSON.stringify(req.body, null, 2));
+
     const payment = req.body as PaymentRequest;
 
-    console.log('\n💳 Payment request received:');
+    console.log('\n💳 Payment request (PARSED):');
     console.log(`   From: ${payment.from}`);
     console.log(`   To: ${payment.to}`);
     console.log(`   Amount: ${payment.amount}`);
     console.log(`   Nonce: ${payment.nonce}`);
+    console.log(`   ValidUntil: ${payment.validUntil}`);
+    console.log(`   Signature: ${payment.signature}`);
+    console.log(`   Network: ${payment.network}`);
 
     try {
       // Validate request
@@ -253,7 +260,7 @@ async function main() {
   // Start server
   app.listen(PORT, () => {
     console.log('🚀 X402 Facilitator Service - LIVE');
-    console.log(`📡 Listening:  http://localhost:${PORT}`);
+    console.log(`📡 Listening on:  ${PORT}`);
     console.log(`🌐 Network:    ${NETWORK}`)
     console.log(`📝 Contract:   ${CONTRACT_ADDRESS}`);
     console.log(`👤 Facilitator: ${facilitatorAccount.address}`);

@@ -45,3 +45,4 @@ docs/
 
 deploy-akash.yaml
 docker-compose.yaml
+yaml/

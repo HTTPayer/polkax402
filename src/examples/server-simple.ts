@@ -30,7 +30,7 @@ app.get('/health', (_req, res) => {
 
 // Create X402 middleware for protected routes
 const x402 = createX402Middleware({
-  network: (process.env.NETWORK as any) || 'dotx402', // Use env var for network
+  network: (process.env.NETWORK as any) || 'polkax402', // Use env var for network
   recipientAddress: process.env.RECIPIENT_ADDRESS || '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
   pricePerRequest: process.env.PRICE_PER_REQUEST || '10000000000', // .001 UNIT
   asset: process.env.CONTRACT_ADDRESS || '5CR7oWebzRjmYrACqiYhh4G7vX4yZnCxT4ZaucYU9mCNvXGM', // HTTPUSD contract address
@@ -103,8 +103,10 @@ app.get('/api/premium/compute',
 // Start server
 app.listen(PORT, () => {
   console.log('\n🚀 X402 Protected Server - LIVE\n');
-  console.log(`📡 Listening:     http://localhost:${PORT}`);
+  console.log(`📡 Listening on:     ${PORT}`);
+  console.log(`🌐 Network:    ${(process.env.NETWORK as any) || 'dotx402'}`)
   console.log(`👤 Recipient:     ${process.env.RECIPIENT_ADDRESS || '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY'}`);
+  console.log(`Contract Adddress: ${process.env.CONTRACT_ADDRESS || '5CgiSNmors7m5Hc8Yu1ZXwSzqNKTZGN9T6mc9bkJUvQpJX3t'}`)
   console.log(`💰 Price/request: ${process.env.PRICE_PER_REQUEST || '1000000000000'} (smallest unit)`);
   console.log(`🔄 Facilitator:   ${process.env.FACILITATOR_URL || 'http://localhost:4000/execute'}\n`);
   console.log('💡 Endpoints:');

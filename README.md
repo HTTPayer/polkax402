@@ -22,7 +22,7 @@ This repository provides a complete X402 payment infrastructure:
 - **Type-Safe** - Full TypeScript support with comprehensive type definitions
 - **Auto-Retry Logic** - Automatic 402 detection and payment handling
 - **Wallet Integration** - Compatible with Polkadot.js extension and injected wallets
-- **ESM Only** - Modern JavaScript modules
+- **Dual Format Support** - Both ESM and CommonJS builds included
 
 ## The polkax402 Blockchain
 

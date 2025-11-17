@@ -4,6 +4,7 @@
  * Express/Connect-compatible middleware for handling X402 payment-gated requests
  */
 
+import https from 'https';
 import {
   decodePaymentHeader,
   verifyPaymentSignature,
@@ -187,12 +188,22 @@ export function createX402Middleware(config: X402MiddlewareConfig) {
     responseMimeType,
   } = config;
 
+  // Pre-initialize crypto when middleware is created
+  // This ensures WASM is ready before first request
+  const cryptoReadyPromise = (async () => {
+    const { cryptoWaitReady } = await import('@polkadot/util-crypto');
+    await cryptoWaitReady();
+  })();
+
   return async function x402Middleware(
     req: any,
     res: any,
     next: any
   ): Promise<void> {
     try {
+      // Ensure crypto is ready (wait for pre-initialization)
+      await cryptoReadyPromise;
+
       // Get payment header
       const paymentHeader = req.headers['x-payment'];
 
@@ -201,45 +212,69 @@ export function createX402Middleware(config: X402MiddlewareConfig) {
         return sendPaymentRequired(req, res, config);
       }
 
+      console.log('\n💳 X402 Payment received:');
+      console.log('   Header (base64):', paymentHeader.substring(0, 50) + '...');
+
       // Decode payment
       let payment: X402PolkadotPayment;
       try {
         payment = decodePaymentHeader(paymentHeader);
+        console.log('   ✅ Payment decoded successfully');
       } catch (error) {
-        res.status(400).send('Invalid payment header format');
+        console.log('   ❌ Failed to decode payment header:', error);
+        res.status(400).json({
+          error: 'Invalid payment header format'
+        });
         return;
       }
 
       // Verify network matches
+      console.log('   Network:', payment.network, '(expected:', network + ')');
       if (payment.network !== network) {
-        res.status(400).send(
-          `Invalid network: expected ${network}, got ${payment.network}`
-        );
+        const errorMsg = `Invalid network: expected ${network}, got ${payment.network}`;
+        console.log('   ❌', errorMsg);
+        res.status(400).json({
+          error: errorMsg
+        });
         return;
       }
 
       // Verify asset matches (if specified)
-      if (asset && payment.asset !== asset) {
-        res.status(400).send(
-          `Invalid asset: expected ${asset}, got ${payment.asset}`
-        );
-        return;
+      if (asset) {
+        console.log('   Asset:', payment.asset, '(expected:', asset + ')');
+        if (payment.asset !== asset) {
+          const errorMsg = `Invalid asset: expected ${asset}, got ${payment.asset}`;
+          console.log('   ❌', errorMsg);
+          res.status(400).json({
+            error: errorMsg
+          });
+          return;
+        }
       }
 
       // Verify signature
+      console.log('🔐 Verifying payment signature...');
+      console.log('   Payment:', JSON.stringify(payment, null, 2));
+
       const signatureValid = await verifyPaymentSignature(payment);
+      console.log('   Signature valid:', signatureValid);
+
       if (!signatureValid) {
-        res.status(403).send(
-          errorMessages?.invalidSignature || 'Invalid payment signature'
-        );
+        const errorMsg = errorMessages?.invalidSignature || 'Invalid payment signature';
+        console.log('   ❌ Signature verification failed:', errorMsg);
+        res.status(403).json({
+          error: errorMsg
+        });
         return;
       }
 
       // Check if payment expired
       if (isPaymentExpired(payment)) {
-        res.status(400).send(
-          errorMessages?.paymentExpired || 'Payment has expired'
-        );
+        const errorMsg = errorMessages?.paymentExpired || 'Payment has expired';
+        console.log('   ❌ Payment expired:', errorMsg);
+        res.status(400).json({
+          error: errorMsg
+        });
         return;
       }
 
@@ -249,12 +284,17 @@ export function createX402Middleware(config: X402MiddlewareConfig) {
       );
 
       // Verify payment is to correct recipient
+      console.log('   Recipient:', parsedPayload.to);
+      console.log('   Expected:', recipientAddress);
       if (parsedPayload.to !== recipientAddress) {
-        res.status(400).send(
-          `Invalid recipient: expected ${recipientAddress}, got ${parsedPayload.to}`
-        );
+        const errorMsg = `Invalid recipient: expected ${recipientAddress}, got ${parsedPayload.to}`;
+        console.log('   ❌', errorMsg);
+        res.status(400).json({
+          error: errorMsg
+        });
         return;
       }
+      console.log('   ✅ Recipient matches');
 
       // Calculate expected price
       const expectedPrice =
@@ -266,13 +306,19 @@ export function createX402Middleware(config: X402MiddlewareConfig) {
       const paymentAmount = BigInt(parsedPayload.amount);
       const expectedAmount = BigInt(expectedPrice);
 
+      console.log('   Amount:', paymentAmount.toString());
+      console.log('   Expected:', expectedAmount.toString());
+
       if (!allowTestPayments && paymentAmount < expectedAmount) {
-        res.status(400).send(
-          errorMessages?.invalidAmount ||
-            `Insufficient payment: expected ${expectedAmount}, got ${paymentAmount}`
-        );
+        const errorMsg = errorMessages?.invalidAmount ||
+            `Insufficient payment: expected ${expectedAmount}, got ${paymentAmount}`;
+        console.log('   ❌', errorMsg);
+        res.status(400).json({
+          error: errorMsg
+        });
         return;
       }
+      console.log('   ✅ Amount sufficient');
 
       // Check payment age
       const paymentAge = Date.now() - (parsedPayload.validUntil - maxPaymentAge);
@@ -294,7 +340,10 @@ export function createX402Middleware(config: X402MiddlewareConfig) {
       let facilitatorResponse: FacilitatorResponse | undefined;
       if (facilitatorUrl) {
         try {
-          const response = await fetch(facilitatorUrl, {
+          // Import secureFetch dynamically
+          const { secureFetch } = await import('../utils/fetch-wrapper.js');
+
+          const response = await secureFetch(facilitatorUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>polkax402 Block Explorer</title>
+  <style>
+    /* Classic Mac OS Platinum Theme */
+    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --mac-gray: #c0c0c0;
+      --mac-dark-gray: #808080;
+      --mac-light-gray: #dfdfdf;
+      --mac-white: #ffffff;
+      --mac-black: #000000;
+      --mac-highlight: #000080;
+      --mac-highlight-text: #ffffff;
+      --mac-window-title: #000000;
+      --mac-shadow: #404040;
+      --mac-border-light: #ffffff;
+      --mac-border-dark: #808080;
+    }
+
+    body {
+      font-family: 'VT323', 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="%23c0c0c0"/><rect x="0" y="0" width="2" height="2" fill="%23dfdfdf"/><rect x="2" y="2" width="2" height="2" fill="%23dfdfdf"/></svg>');
+      background-color: var(--mac-gray);
+      padding: 20px;
+      min-height: 100vh;
+      color: var(--mac-black);
+      font-size: 18px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Mac Window Styling */
+    .window {
+      background: var(--mac-gray);
+      border: 2px solid var(--mac-black);
+      box-shadow:
+        inset 1px 1px 0 var(--mac-border-light),
+        inset -1px -1px 0 var(--mac-border-dark),
+        4px 4px 0 var(--mac-shadow);
+      margin-bottom: 20px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .title-bar {
+      background: linear-gradient(to bottom, var(--mac-white) 0%, var(--mac-gray) 100%);
+      border-bottom: 2px solid var(--mac-black);
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .title-bar-stripes {
+      flex: 1;
+      height: 18px;
+      background: repeating-linear-gradient(
+        0deg,
+        var(--mac-black),
+        var(--mac-black) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      opacity: 0.3;
+    }
+
+    .title-text {
+      font-weight: bold;
+      font-size: 20px;
+      text-align: center;
+      flex: 1;
+      letter-spacing: 1px;
+    }
+
+    .close-box {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--mac-black);
+      background: var(--mac-white);
+      box-shadow: inset 1px 1px 0 var(--mac-border-light);
+      position: relative;
+    }
+
+    .close-box:after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--mac-black);
+      top: 3px;
+      left: 3px;
+    }
+
+    .window-content {
+      padding: 16px;
+      background: var(--mac-white);
+      border: 2px solid var(--mac-black);
+      border-top: none;
+      box-shadow:
+        inset 2px 2px 0 var(--mac-border-dark),
+        inset -2px -2px 0 var(--mac-border-light);
+      min-height: 200px;
+    }
+
+    /* Menu Bar */
+    .menu-bar {
+      background: var(--mac-white);
+      border-bottom: 2px solid var(--mac-black);
+      padding: 8px 16px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 0 var(--mac-border-dark);
+    }
+
+    .menu-item {
+      font-weight: bold;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    .menu-item:hover {
+      background: var(--mac-black);
+      color: var(--mac-white);
+    }
+
+    .menu-item.active {
+      background: var(--mac-black);
+      color: var(--mac-white);
+    }
+
+    /* Search Bar */
+    .search-container {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .input-field {
+      flex: 1;
+      padding: 8px 12px;
+      border: 2px solid var(--mac-black);
+      background: var(--mac-white);
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      box-shadow:
+        inset 2px 2px 0 var(--mac-border-dark),
+        inset -1px -1px 0 var(--mac-border-light);
+    }
+
+    .input-field:focus {
+      outline: 2px solid var(--mac-highlight);
+      outline-offset: -4px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 20px;
+      border: 2px solid var(--mac-black);
+      background: linear-gradient(to bottom, var(--mac-white) 0%, var(--mac-gray) 100%);
+      font-family: 'VT323', sans-serif;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow:
+        inset 1px 1px 0 var(--mac-border-light),
+        inset -1px -1px 0 var(--mac-border-dark),
+        2px 2px 0 var(--mac-shadow);
+      letter-spacing: 1px;
+    }
+
+    .btn:active {
+      box-shadow:
+        inset 2px 2px 0 var(--mac-border-dark),
+        inset -1px -1px 0 var(--mac-border-light);
+      background: var(--mac-gray);
+    }
+
+    .btn:hover {
+      background: linear-gradient(to bottom, var(--mac-light-gray) 0%, var(--mac-gray) 100%);
+    }
+
+    /* Table Styling */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 2px solid var(--mac-black);
+      background: var(--mac-white);
+    }
+
+    .data-table th {
+      background: var(--mac-gray);
+      padding: 8px 12px;
+      border: 2px solid var(--mac-black);
+      font-weight: bold;
+      text-align: left;
+      font-size: 18px;
+      letter-spacing: 1px;
+    }
+
+    .data-table td {
+      padding: 8px 12px;
+      border: 1px solid var(--mac-dark-gray);
+      font-size: 16px;
+      word-break: break-all;
+    }
+
+    .data-table tr:nth-child(even) {
+      background: var(--mac-light-gray);
+    }
+
+    .data-table tr:hover {
+      background: var(--mac-highlight);
+      color: var(--mac-white);
+      cursor: pointer;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: var(--mac-white);
+      border: 2px solid var(--mac-black);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow:
+        inset 2px 2px 0 var(--mac-border-dark),
+        inset -2px -2px 0 var(--mac-border-light);
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--mac-dark-gray);
+      font-size: 17px;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .info-value {
+      word-break: break-all;
+      font-family: 'Courier New', monospace;
+      font-size: 15px;
+    }
+
+    /* Loading Indicator */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 22px;
+      letter-spacing: 2px;
+    }
+
+    .loading:after {
+      content: '...';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    /* Links */
+    a {
+      color: var(--mac-highlight);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Status Badge */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border: 2px solid var(--mac-black);
+      background: var(--mac-white);
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .badge.success {
+      background: #90EE90;
+      color: var(--mac-black);
+    }
+
+    .badge.error {
+      background: #FFB6C1;
+      color: var(--mac-black);
+    }
+
+    /* Hide elements */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Card Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--mac-white);
+      border: 2px solid var(--mac-black);
+      padding: 16px;
+      box-shadow:
+        inset 1px 1px 0 var(--mac-border-light),
+        inset -1px -1px 0 var(--mac-border-dark),
+        3px 3px 0 var(--mac-shadow);
+    }
+
+    .card-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 8px;
+      border-bottom: 2px solid var(--mac-black);
+      padding-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .card-value {
+      font-size: 24px;
+      margin-top: 8px;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 18px;
+      height: 18px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--mac-white);
+      border: 2px solid var(--mac-black);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--mac-gray);
+      border: 2px solid var(--mac-black);
+      box-shadow: inset 1px 1px 0 var(--mac-border-light);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--mac-dark-gray);
+    }
+
+    /* Error message */
+    .error-message {
+      background: #FFB6C1;
+      border: 2px solid var(--mac-black);
+      padding: 16px;
+      margin: 16px 0;
+      font-weight: bold;
+      box-shadow: 3px 3px 0 var(--mac-shadow);
+    }
+
+    /* Code block */
+    .code-block {
+      background: var(--mac-black);
+      color: #00FF00;
+      padding: 12px;
+      border: 2px solid var(--mac-black);
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      overflow-x: auto;
+      margin: 8px 0;
+      box-shadow: inset 2px 2px 0 var(--mac-shadow);
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .page-btn {
+      padding: 8px 16px;
+      border: 2px solid var(--mac-black);
+      background: var(--mac-white);
+      cursor: pointer;
+      font-family: 'VT323', sans-serif;
+      font-size: 18px;
+      box-shadow: 2px 2px 0 var(--mac-shadow);
+    }
+
+    .page-btn:hover {
+      background: var(--mac-gray);
+    }
+
+    .page-btn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Truncate hash */
+    .hash {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+
+    .hash-short {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+
+    /* Apple logo */
+    .apple-logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* Network status */
+    .network-status {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--mac-gray);
+      border: 2px solid var(--mac-black);
+      padding: 12px 16px;
+      box-shadow: 4px 4px 0 var(--mac-shadow);
+      font-size: 16px;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--mac-black);
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.online {
+      background: #90EE90;
+    }
+
+    .status-dot.offline {
+      background: #FFB6C1;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .mono {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Main Application Window -->
+  <div class="window">
+    <div class="title-bar">
+      <div class="close-box"></div>
+      <div class="title-bar-stripes"></div>
+      <div class="title-text">polkax402 Block Explorer</div>
+      <div class="title-bar-stripes"></div>
+    </div>
+
+    <div class="window-content">
+      <!-- Menu Bar -->
+      <div class="menu-bar">
+        <div class="apple-logo">&#63743;</div>
+        <div class="menu-item active" data-view="home">Home</div>
+        <div class="menu-item" data-view="blocks">Blocks</div>
+        <div class="menu-item" data-view="tokens">Tokens</div>
+        <div class="menu-item" data-view="about">About</div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        <input
+          type="text"
+          class="input-field"
+          id="searchInput"
+          placeholder="Search by Block #, Block Hash, Tx Hash, or Address..."
+        />
+        <button class="btn" onclick="search()">Search</button>
+      </div>
+
+      <!-- Content Views -->
+      <div id="content">
+        <!-- Home View -->
+        <div id="homeView">
+          <div class="loading">Loading chain info</div>
+        </div>
+
+        <!-- Blocks View -->
+        <div id="blocksView" class="hidden">
+          <div class="loading">Loading blocks</div>
+        </div>
+
+        <!-- Block Detail View -->
+        <div id="blockDetailView" class="hidden">
+          <div class="loading">Loading block details</div>
+        </div>
+
+        <!-- Account View -->
+        <div id="accountView" class="hidden">
+          <div class="loading">Loading account info</div>
+        </div>
+
+        <!-- Transaction View -->
+        <div id="transactionView" class="hidden">
+          <div class="loading">Loading transaction details</div>
+        </div>
+
+        <!-- Tokens View -->
+        <div id="tokensView" class="hidden">
+          <div class="loading">Loading token info</div>
+        </div>
+
+        <!-- About View -->
+        <div id="aboutView" class="hidden">
+          <div class="info-box">
+            <h2 style="margin-bottom: 16px; font-size: 24px; border-bottom: 2px solid black; padding-bottom: 8px;">About polkax402 Explorer</h2>
+            <p style="margin-bottom: 12px; line-height: 1.6;">
+              This is a lightweight block explorer for the polkax402 blockchain network.
+              Built with a classic Mac OS aesthetic to celebrate the golden era of computing.
+            </p>
+            <p style="margin-bottom: 12px; line-height: 1.6;">
+              <strong>Features:</strong>
+            </p>
+            <ul style="margin-left: 32px; line-height: 1.8;">
+              <li>Search blocks by number or hash</li>
+              <li>Search transactions by hash (extrinsic hash)</li>
+              <li>Search accounts by address</li>
+              <li>View real-time blockchain data</li>
+              <li>Track HTTPUSD token balances</li>
+              <li>Monitor network status</li>
+              <li>Retro 90's Apple interface</li>
+            </ul>
+            <p style="margin-top: 16px; padding: 12px; background: var(--mac-light-gray); border: 2px solid black;">
+              <strong>Search Examples:</strong><br>
+              • Block number: <code>12345</code><br>
+              • Block hash: <code>0x1234...</code><br>
+              • Transaction hash: <code>0xabcd...</code><br>
+              • Account address: <code>5GrwvaEF...</code>
+            </p>
+            <p style="margin-top: 16px; padding-top: 16px; border-top: 2px solid black;">
+              <strong>Version:</strong> 1.0.0<br>
+              <strong>Network:</strong> polkax402<br>
+              <strong>Theme:</strong> Mac OS Platinum
+            </p>
+          </div>
+        </div>
+
+        <!-- Search Results View -->
+        <div id="searchResultsView" class="hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Network Status Indicator -->
+  <div class="network-status">
+    <span class="status-dot online" id="statusDot"></span>
+    <span id="statusText">Connected</span>
+  </div>
+
+  <script>
+    // Configuration
+    const API_BASE = 'http://localhost:5000/api';
+    let currentView = 'home';
+    let chainInfo = null;
+
+    // Utility Functions
+    function formatHash(hash, length = 16) {
+      if (!hash) return 'N/A';
+      if (hash.length <= length) return hash;
+      return `${hash.substring(0, length/2)}...${hash.substring(hash.length - length/2)}`;
+    }
+
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return 'N/A';
+      return new Date(timestamp).toLocaleString();
+    }
+
+    function formatBalance(balance) {
+      if (!balance) return '0';
+      // Convert from smallest unit (assuming 12 decimals like DOT)
+      const num = BigInt(balance);
+      const decimals = 12;
+      const divisor = BigInt(10 ** decimals);
+      const whole = num / divisor;
+      const fraction = num % divisor;
+      return `${whole}.${fraction.toString().padStart(decimals, '0').substring(0, 4)}`;
+    }
+
+    function showLoading(viewId) {
+      const view = document.getElementById(viewId);
+      view.innerHTML = '<div class="loading">Loading</div>';
+    }
+
+    function showError(viewId, message) {
+      const view = document.getElementById(viewId);
+      view.innerHTML = `<div class="error-message">Error: ${message}</div>`;
+    }
+
+    function hideAllViews() {
+      document.querySelectorAll('#content > div').forEach(view => {
+        view.classList.add('hidden');
+      });
+    }
+
+    function showView(viewId) {
+      hideAllViews();
+      document.getElementById(viewId).classList.remove('hidden');
+    }
+
+    // API Calls
+    async function fetchAPI(endpoint) {
+      try {
+        const response = await fetch(`${API_BASE}${endpoint}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } catch (error) {
+        updateNetworkStatus(false);
+        throw error;
+      }
+    }
+
+    // Update network status
+    function updateNetworkStatus(online) {
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      if (online) {
+        dot.className = 'status-dot online';
+        text.textContent = 'Connected';
+      } else {
+        dot.className = 'status-dot offline';
+        text.textContent = 'Disconnected';
+      }
+    }
+
+    // View Renderers
+    async function renderHome() {
+      showLoading('homeView');
+      try {
+        const [chain, blocks] = await Promise.all([
+          fetchAPI('/chain'),
+          fetchAPI('/blocks?limit=10')
+        ]);
+
+        chainInfo = chain;
+        updateNetworkStatus(true);
+
+        const html = `
+          <div class="card-grid">
+            <div class="card">
+              <div class="card-title">Network</div>
+              <div class="card-value">${chain.chain || chain.network}</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Best Block</div>
+              <div class="card-value">#${chain.bestBlock.toLocaleString()}</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Node</div>
+              <div class="card-value" style="font-size: 18px;">${chain.nodeName}</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Version</div>
+              <div class="card-value" style="font-size: 18px;">${chain.nodeVersion}</div>
+            </div>
+          </div>
+
+          <h2 style="margin: 24px 0 16px; font-size: 24px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            Recent Blocks
+          </h2>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Block</th>
+                <th>Hash</th>
+                <th>Extrinsics</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${blocks.blocks.map(block => `
+                <tr onclick="viewBlock(${block.number})">
+                  <td><strong>#${block.number}</strong></td>
+                  <td class="hash-short">${formatHash(block.hash, 20)}</td>
+                  <td>${block.extrinsicsCount}</td>
+                  <td>${formatTimestamp(block.timestamp)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div style="text-align: center; margin-top: 16px;">
+            <button class="btn" onclick="viewBlocks()">View All Blocks</button>
+          </div>
+        `;
+
+        document.getElementById('homeView').innerHTML = html;
+      } catch (error) {
+        showError('homeView', error.message);
+      }
+    }
+
+    async function renderBlocks() {
+      showLoading('blocksView');
+      try {
+        const data = await fetchAPI('/blocks?limit=50');
+        updateNetworkStatus(true);
+
+        const html = `
+          <h2 style="margin-bottom: 16px; font-size: 24px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            Latest Blocks (${data.total.toLocaleString()} total)
+          </h2>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Block</th>
+                <th>Hash</th>
+                <th>Parent Hash</th>
+                <th>Extrinsics</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.blocks.map(block => `
+                <tr onclick="viewBlock(${block.number})">
+                  <td><strong>#${block.number}</strong></td>
+                  <td class="hash-short">${formatHash(block.hash, 16)}</td>
+                  <td class="hash-short">${formatHash(block.parentHash, 16)}</td>
+                  <td>${block.extrinsicsCount}</td>
+                  <td>${formatTimestamp(block.timestamp)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+
+        document.getElementById('blocksView').innerHTML = html;
+      } catch (error) {
+        showError('blocksView', error.message);
+      }
+    }
+
+    async function renderBlockDetail(blockNumber) {
+      showLoading('blockDetailView');
+      showView('blockDetailView');
+
+      try {
+        const block = await fetchAPI(`/blocks/${blockNumber}`);
+        updateNetworkStatus(true);
+
+        const html = `
+          <h2 style="margin-bottom: 16px; font-size: 24px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            Block #${block.number}
+          </h2>
+
+          <div class="info-box">
+            <div class="info-row">
+              <div class="info-label">Block Number:</div>
+              <div class="info-value">${block.number}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Block Hash:</div>
+              <div class="info-value">${block.hash}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Parent Hash:</div>
+              <div class="info-value"><a onclick="viewBlock('${block.parentHash}')">${block.parentHash}</a></div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">State Root:</div>
+              <div class="info-value">${block.stateRoot}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Extrinsics Root:</div>
+              <div class="info-value">${block.extrinsicsRoot}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Timestamp:</div>
+              <div class="info-value">${formatTimestamp(block.timestamp)}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Extrinsics:</div>
+              <div class="info-value">${block.extrinsics.length}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Events:</div>
+              <div class="info-value">${block.events.length}</div>
+            </div>
+          </div>
+
+          <h3 style="margin: 24px 0 16px; font-size: 20px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            Extrinsics (${block.extrinsics.length})
+          </h3>
+
+          ${block.extrinsics.length > 0 ? `
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Index</th>
+                  <th>Hash</th>
+                  <th>Method</th>
+                  <th>Signer</th>
+                  <th>Signed</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${block.extrinsics.map(ext => `
+                  <tr onclick="viewTransaction('${ext.hash}')">
+                    <td>${ext.index}</td>
+                    <td class="hash-short">${formatHash(ext.hash, 16)}</td>
+                    <td><strong>${ext.method}</strong></td>
+                    <td class="hash-short">${formatHash(ext.signer, 16)}</td>
+                    <td>${ext.isSigned ? '✓' : '✗'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          ` : '<p>No extrinsics in this block.</p>'}
+
+          <h3 style="margin: 24px 0 16px; font-size: 20px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            Events (${block.events.length})
+          </h3>
+
+          ${block.events.length > 0 ? `
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Phase</th>
+                  <th>Section</th>
+                  <th>Method</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${block.events.map(event => `
+                  <tr>
+                    <td>${event.phase}</td>
+                    <td>${event.section}</td>
+                    <td><strong>${event.method}</strong></td>
+                    <td class="mono" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${event.data}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          ` : '<p>No events in this block.</p>'}
+
+          <div style="margin-top: 16px;">
+            <button class="btn" onclick="viewBlocks()">← Back to Blocks</button>
+          </div>
+        `;
+
+        document.getElementById('blockDetailView').innerHTML = html;
+      } catch (error) {
+        showError('blockDetailView', error.message);
+      }
+    }
+
+    async function renderAccount(address) {
+      showLoading('accountView');
+      showView('accountView');
+
+      try {
+        const [account, txHistory] = await Promise.all([
+          fetchAPI(`/accounts/${address}`),
+          fetchAPI(`/accounts/${address}/transactions?limit=20`)
+        ]);
+
+        // Try to get HTTPUSD balance (may fail if not configured)
+        let httpusdBalance = null;
+        try {
+          httpusdBalance = await fetchAPI(`/accounts/${address}/httpusd`);
+        } catch (e) {
+          console.log('HTTPUSD not available');
+        }
+
+        updateNetworkStatus(true);
+
+        const html = `
+          <h2 style="margin-bottom: 16px; font-size: 24px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            Account Details
+          </h2>
+
+          <div class="info-box">
+            <div class="info-row">
+              <div class="info-label">Address:</div>
+              <div class="info-value">${account.address}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Nonce:</div>
+              <div class="info-value">${account.nonce}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Free Balance:</div>
+              <div class="info-value">${account.balance.freeHuman} (${account.balance.free})</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Reserved:</div>
+              <div class="info-value">${account.balance.reservedHuman} (${account.balance.reserved})</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Frozen:</div>
+              <div class="info-value">${account.balance.frozenHuman} (${account.balance.frozen})</div>
+            </div>
+            ${httpusdBalance ? `
+              <div class="info-row">
+                <div class="info-label">HTTPUSD Balance:</div>
+                <div class="info-value">${httpusdBalance.balanceHuman} (${httpusdBalance.balance})</div>
+              </div>
+            ` : ''}
+          </div>
+
+          <h3 style="margin: 24px 0 16px; font-size: 20px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            Recent Transactions (${txHistory.count})
+          </h3>
+
+          ${txHistory.transactions.length > 0 ? `
+            <p style="margin-bottom: 12px; font-style: italic;">
+              ${txHistory.note}
+            </p>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Hash</th>
+                  <th>Block</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${txHistory.transactions.map(tx => `
+                  <tr onclick="viewTransaction('${tx.hash}')">
+                    <td class="hash-short">${formatHash(tx.hash, 16)}</td>
+                    <td><a onclick="event.stopPropagation(); viewBlock(${tx.blockNumber})">#${tx.blockNumber}</a></td>
+                    <td><strong>${tx.method}</strong></td>
+                    <td><span class="badge ${tx.success ? 'success' : 'error'}">${tx.success ? 'Success' : 'Failed'}</span></td>
+                    <td>${formatTimestamp(tx.timestamp)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          ` : '<p>No transactions found for this account in recent blocks.</p>'}
+
+          <div style="margin-top: 16px;">
+            <button class="btn" onclick="renderHome(); showView('homeView')">← Back to Home</button>
+          </div>
+        `;
+
+        document.getElementById('accountView').innerHTML = html;
+      } catch (error) {
+        showError('accountView', error.message);
+      }
+    }
+
+    async function renderTransaction(hash) {
+      showLoading('transactionView');
+      showView('transactionView');
+
+      try {
+        const tx = await fetchAPI(`/extrinsics/${hash}`);
+        updateNetworkStatus(true);
+
+        const html = `
+          <h2 style="margin-bottom: 16px; font-size: 24px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            Transaction Details
+          </h2>
+
+          <div class="info-box">
+            <div class="info-row">
+              <div class="info-label">Hash:</div>
+              <div class="info-value">${tx.hash}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Block:</div>
+              <div class="info-value"><a onclick="viewBlock(${tx.blockNumber})">#${tx.blockNumber}</a></div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Block Hash:</div>
+              <div class="info-value">${tx.blockHash}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Index:</div>
+              <div class="info-value">${tx.index}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Method:</div>
+              <div class="info-value"><strong>${tx.method}</strong></div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Signer:</div>
+              <div class="info-value"><a onclick="viewAccount('${tx.signer}')">${tx.signer}</a></div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Signed:</div>
+              <div class="info-value">${tx.isSigned ? 'Yes' : 'No'}</div>
+            </div>
+          </div>
+
+          <h3 style="margin: 24px 0 16px; font-size: 20px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            Arguments
+          </h3>
+          <div class="code-block">
+            ${tx.args.map((arg, i) => `[${i}] ${arg}`).join('<br>')}
+          </div>
+
+          <h3 style="margin: 24px 0 16px; font-size: 20px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            Events (${tx.events.length})
+          </h3>
+
+          ${tx.events.length > 0 ? `
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Section</th>
+                  <th>Method</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tx.events.map(event => `
+                  <tr>
+                    <td>${event.section}</td>
+                    <td><strong>${event.method}</strong></td>
+                    <td class="mono" style="max-width: 400px; overflow: hidden; text-overflow: ellipsis;">${event.data}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          ` : '<p>No events for this transaction.</p>'}
+
+          <div style="margin-top: 16px;">
+            <button class="btn" onclick="viewBlock(${tx.blockNumber})">← Back to Block</button>
+          </div>
+        `;
+
+        document.getElementById('transactionView').innerHTML = html;
+      } catch (error) {
+        showError('transactionView', error.message);
+      }
+    }
+
+    async function renderTokens() {
+      showLoading('tokensView');
+
+      try {
+        const tokenInfo = await fetchAPI('/tokens/httpusd');
+        updateNetworkStatus(true);
+
+        const html = `
+          <h2 style="margin-bottom: 16px; font-size: 24px; border-bottom: 2px solid black; padding-bottom: 8px;">
+            HTTPUSD Token
+          </h2>
+
+          <div class="card-grid">
+            <div class="card">
+              <div class="card-title">Name</div>
+              <div class="card-value" style="font-size: 20px;">${tokenInfo.name}</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Symbol</div>
+              <div class="card-value">${tokenInfo.symbol}</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Network</div>
+              <div class="card-value" style="font-size: 18px;">${tokenInfo.network}</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Total Supply</div>
+              <div class="card-value" style="font-size: 18px;">${tokenInfo.totalSupplyHuman}</div>
+            </div>
+          </div>
+
+          <div class="info-box" style="margin-top: 24px;">
+            <div class="info-row">
+              <div class="info-label">Contract Address:</div>
+              <div class="info-value">${tokenInfo.contractAddress}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Total Supply (raw):</div>
+              <div class="info-value">${tokenInfo.totalSupply}</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 24px; padding: 16px; background: var(--mac-light-gray); border: 2px solid black;">
+            <p style="line-height: 1.6;">
+              <strong>About HTTPUSD:</strong><br>
+              HTTPUSD is a PSP22 token deployed on the polkax402 network.
+              Use the search bar above to check any account's HTTPUSD balance by entering their address.
+            </p>
+          </div>
+        `;
+
+        document.getElementById('tokensView').innerHTML = html;
+      } catch (error) {
+        showError('tokensView', error.message);
+      }
+    }
+
+    // Navigation Functions
+    function viewBlock(blockNumber) {
+      renderBlockDetail(blockNumber);
+    }
+
+    function viewBlocks() {
+      showView('blocksView');
+      renderBlocks();
+    }
+
+    function viewAccount(address) {
+      renderAccount(address);
+    }
+
+    function viewTransaction(hash) {
+      renderTransaction(hash);
+    }
+
+    async function search() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+
+      // Show loading state
+      showLoading('homeView');
+      showView('homeView');
+
+      // Determine what type of search this is
+      if (/^\d+$/.test(query)) {
+        // It's a block number
+        viewBlock(parseInt(query));
+      } else if (query.startsWith('0x')) {
+        // Could be block hash, tx hash, or account
+        // Try to search via the API
+        try {
+          const results = await fetchAPI(`/search?q=${encodeURIComponent(query)}`);
+
+          if (results.blocks.length > 0) {
+            // Found as block hash
+            viewBlock(results.blocks[0].number);
+          } else if (results.accounts.length > 0) {
+            // Found as account address
+            viewAccount(results.accounts[0].address);
+          } else {
+            // Try as transaction hash
+            console.log('Searching for transaction hash:', query);
+            viewTransaction(query);
+          }
+        } catch (error) {
+          // If search API fails, still try as transaction hash
+          try {
+            await viewTransaction(query);
+          } catch (txError) {
+            showError('homeView', `Not found: Could not find block, transaction, or account with "${query}"`);
+            showView('homeView');
+          }
+        }
+      } else {
+        // Assume it's an SS58 address
+        try {
+          viewAccount(query);
+        } catch (error) {
+          showError('homeView', `Invalid address: ${error.message}`);
+          showView('homeView');
+        }
+      }
+    }
+
+    // Menu handling
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+        e.target.classList.add('active');
+
+        const view = e.target.dataset.view;
+
+        switch(view) {
+          case 'home':
+            showView('homeView');
+            renderHome();
+            break;
+          case 'blocks':
+            showView('blocksView');
+            renderBlocks();
+            break;
+          case 'tokens':
+            showView('tokensView');
+            renderTokens();
+            break;
+          case 'about':
+            showView('aboutView');
+            break;
+        }
+      });
+    });
+
+    // Search on Enter key
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        search();
+      }
+    });
+
+    // Initialize app
+    renderHome();
+  </script>
+</body>
+</html>

@@ -3,23 +3,11 @@ import { ContractPromise } from '@polkadot/api-contract';
 import { Keyring } from '@polkadot/keyring';
 import dotenv from 'dotenv';
 import * as fs from 'fs';
-import { getDecimals, formatTokenAmount, parseTokenAmount } from '../dist/utils/contract-helpers.js';
 
 dotenv.config();
 
-// const account = args[0];
-// const amount = args[1];
-
-const account = process.env.FUND_ACCOUNT || '//Charlie';
-const humanAmount = process.env.FUND_AMOUNT || '500'; // 500 tokens
-
 const WS_ENDPOINT = process.env.WS_ENDPOINT || 'ws://localhost:9944';
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || '5CgiSNmors7m5Hc8Yu1ZXwSzqNKTZGN9T6mc9bkJUvQpJX3t';
-
-console.log('Using WS_ENDPOINT:', WS_ENDPOINT);
-console.log('Using CONTRACT_ADDRESS:', CONTRACT_ADDRESS);
-console.log('Funding account:', account);
-console.log('Funding amount:', humanAmount, 'tokens');
+const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || '5CR7oWebzRjmYrACqiYhh4G7vX4yZnCxT4ZaucYU9mCNvXGM';
 
 async function main() {
   console.log('💰 Funding Bob with HTTPUSD tokens...\n');
@@ -34,17 +22,18 @@ async function main() {
   const keyring = new Keyring({ type: 'sr25519' });
 
   const alice = keyring.addFromUri('//Alice');
-  const bob = keyring.addFromUri(account);
+  const bob = keyring.addFromUri('//Bob');
 
-  // Get decimals from contract
-  const decimals = await getDecimals(contract, alice.address, api);
-
-  // Convert human-readable amount to raw amount
-  const rawAmount ='1000000000000'
+  // Human-readable amount (in tokens)
+  const humanAmount = 100; // Change this to send different amounts
+  const decimals = 9; // HTTPUSD uses 9 decimals
+  const rawAmount = BigInt(humanAmount) * BigInt(10 ** decimals);
 
   console.log('From: Alice (' + alice.address + ')');
-  console.log(`To:   ${account}   (` + bob.address + ')');
-  console.log(`Amount: ${humanAmount} tokens (raw: ${rawAmount}, decimals: ${decimals})\n`);
+  console.log('To:   Bob   (' + bob.address + ')');
+  console.log('Amount: ' + humanAmount + ' tokens (raw: ' + rawAmount.toString() + ')\n');
+
+  const amount = rawAmount.toString();
 
   const tx = contract.tx.transfer(
     {
@@ -55,7 +44,7 @@ async function main() {
       storageDepositLimit: null,
     },
     bob.address,
-    rawAmount
+    amount
   );
 
   return new Promise((resolve, reject) => {
@@ -74,7 +63,7 @@ async function main() {
           }
         } else {
           console.log('✅ Transfer successful!');
-          console.log(`\n${account} should now have received ${humanAmount} HTTPUSD tokens.\n`);
+          console.log('\nBob should now have 100,000 HTTPUSD tokens.\n');
           resolve();
         }
       } else if (result.status.isFinalized) {

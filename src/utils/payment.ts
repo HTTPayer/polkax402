@@ -202,11 +202,12 @@ export async function createPaymentHeader(
 export async function verifyPaymentSignature(
   payment: X402PolkadotPayment
 ): Promise<boolean> {
-  await ensureCryptoReady();
-
   try {
     const { blake2AsU8a, decodeAddress, signatureVerify } = await import('@polkadot/util-crypto');
     const { u8aConcat, stringToU8a, bnToU8a } = await import('@polkadot/util');
+
+    // Ensure crypto is ready AFTER imports
+    await ensureCryptoReady();
     const { payload, signature, signerPublicKey } = payment.payload;
 
     if (!signerPublicKey) {
