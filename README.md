@@ -4,6 +4,17 @@
 
 A lightweight, type-safe SDK that brings HTTP 402 Payment Required to the Polkadot ecosystem through the polkax402 Substrate blockchain. Enable pay-per-use APIs with cryptographic payment proofs using the HTTPUSD contract's `transferWithAuthorization` for non-EVM assets.
 
+## What's Included
+
+This repository provides a complete X402 payment infrastructure:
+
+- **TypeScript SDK** - Client and server libraries for X402 payment integration
+- **HTTPUSD Contract** - ink! smart contract enabling `transferWithAuthorization` for non-EVM assets
+- **polkax402 Blockchain** - Custom Substrate chain with X402 support (deployed on Akash)
+- **Facilitator Service** - Payment execution service that processes signed authorizations on-chain (deployed)
+- **Demo Server** - Example X402-protected API demonstrating payment-gated endpoints
+- **Explorer API** - REST API for querying blockchain data (blocks, accounts, transactions)
+
 ## Features
 
 - **Cryptographic Payment Proofs** - Sign payments with Polkadot keypairs
@@ -305,7 +316,7 @@ The X-Payment header contains a base64-encoded JSON object:
 {
   "x402Version": 1,
   "scheme": "exact",
-  "network": "polkadot",
+  "network": "polkax402",
   "payload": {
     "payload": "{\"from\":\"5Gj...\",\"to\":\"5Ff...\",\"amount\":\"1000000000000\",\"nonce\":\"0x...\",\"validUntil\":1234567890}",
     "signature": "0x...",
@@ -347,9 +358,41 @@ docker-compose down
 ```
 
 **Services available:**
-- **Server (API)**: http://localhost:3000
-- **Facilitator**: http://localhost:4000
-- **Explorer**: http://localhost:5000
+- **Demo Server (X402-Protected API)**: http://localhost:3000
+- **Facilitator Service**: http://localhost:4000
+- **Explorer API**: http://localhost:5000
+
+For complete Docker deployment guide, see [DOCKER.md](./DOCKER.md)
+
+## Explorer API
+
+The Explorer API provides REST endpoints for querying the polkax402 blockchain:
+
+**Endpoints:**
+- `GET /health` - Health check
+- `GET /api/chain` - Chain information
+- `GET /api/blocks` - Latest blocks (with pagination)
+- `GET /api/blocks/:numberOrHash` - Block details
+- `GET /api/accounts/:address` - Account balance and info
+- `GET /api/extrinsics/:hash` - Extrinsic details
+- `GET /api/search?q=...` - Search blocks, accounts, and extrinsics
+
+**Example:**
+```bash
+# Get chain info
+curl http://localhost:5000/api/chain
+
+# Get latest 10 blocks
+curl http://localhost:5000/api/blocks?limit=10
+
+# Get account balance
+curl http://localhost:5000/api/accounts/5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+```
+
+Run locally with:
+```bash
+npm run explorer
+```
 
 ## License
 
