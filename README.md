@@ -24,6 +24,16 @@ This repository provides a complete X402 payment infrastructure:
 - **Wallet Integration** - Compatible with Polkadot.js extension and injected wallets
 - **Dual Format Support** - Both ESM and CommonJS builds included
 
+## Deployed Services
+
+The polkax402 payment infrastructure is fully deployed and ready to use:
+
+- **Contract Address**: `5CR7oWebzRjmYrACqiYhh4G7vX4yZnCxT4ZaucYU9mCNvXGM`
+- **WebSocket RPC**: `wss://rpc.polkax402.dpdns.org`
+- **Facilitator Service**: `https://facilitator.polkax402.dpdns.org/settle`
+- **Demo Server**: `https://demo.polkax402.dpdns.org`
+- **Explorer**: `explorer.polkax402.com`
+
 ## The polkax402 Blockchain
 
 **polkax402** is an X402-enabled Substrate blockchain that provides `transferWithAuthorization` capabilities for non-EVM assets. Unlike traditional EVM-based payment systems, polkax402 brings cryptographic payment authorization directly to the Polkadot ecosystem through the HTTPUSD smart contract.
@@ -43,7 +53,7 @@ A **bridge wrapper contract** will be deployed to enable compatibility with othe
 
 ### Network Configuration
 
-- **RPC Endpoint**: https://bov424mc35ckd0qqjgd7cb6888.ingress.akash-palmito.org/
+- **RPC Endpoint**: wss://rpc.polkax402.dpdns.org
 - **Network Name**: polkax402
 - **Chain Type**: Custom Substrate blockchain with ink! smart contract support
 

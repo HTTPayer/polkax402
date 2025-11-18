@@ -552,7 +552,6 @@
             <h2 style="margin-bottom: 16px; font-size: 24px; border-bottom: 2px solid black; padding-bottom: 8px;">About polkax402 Explorer</h2>
             <p style="margin-bottom: 12px; line-height: 1.6;">
               This is a lightweight block explorer for the polkax402 blockchain network.
-              Built with a classic Mac OS aesthetic to celebrate the golden era of computing.
             </p>
             <p style="margin-bottom: 12px; line-height: 1.6;">
               <strong>Features:</strong>
@@ -576,7 +575,6 @@
             <p style="margin-top: 16px; padding-top: 16px; border-top: 2px solid black;">
               <strong>Version:</strong> 1.0.0<br>
               <strong>Network:</strong> polkax402<br>
-              <strong>Theme:</strong> Mac OS Platinum
             </p>
           </div>
         </div>
@@ -593,9 +591,12 @@
     <span id="statusText">Connected</span>
   </div>
 
+  <!-- Load dynamic configuration -->
+  <script src="/config.js"></script>
+
   <script>
     // Configuration
-    const API_BASE = 'http://localhost:5000/api';
+    const API_BASE = window.EXPLORER_CONFIG?.API_BASE || '/api';
     let currentView = 'home';
     let chainInfo = null;
 

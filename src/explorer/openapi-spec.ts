@@ -18,10 +18,6 @@ export const openApiSpec = {
   },
   servers: [
     {
-      url: 'http://localhost:5000',
-      description: 'Local development server',
-    },
-    {
       url: 'https://explorer.polkax402.com',
       description: 'Production server',
     },

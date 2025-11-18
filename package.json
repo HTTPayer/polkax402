@@ -1,5 +1,5 @@
 {
-  "name": "dotx402",
+  "name": "polkax402",
   "version": "1.0.0",
   "description": "Typescript SDK for x402 on Polkadot",
   "type": "module",
@@ -44,8 +44,8 @@
   "scripts": {
     "build": "tsup",
     "watch": "tsup --watch",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && npm run build",
+    "clean": "if exist dist rmdir /s /q dist",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "account:generate": "node scripts/generate-account.js",
     "account:inspect": "node scripts/inspect-account.js",

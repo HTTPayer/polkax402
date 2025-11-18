@@ -27,6 +27,7 @@ const PORT = process.env.EXPLORER_PORT || 5000;
 const WS_ENDPOINT = process.env.WS_ENDPOINT || "wss://rpc.polkax402.dpdns.org";
 const NETWORK = process.env.NETWORK || "polkax402";
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+const API_BASE_URL = process.env.API_BASE_URL || '/api';
 
 console.log(`Contract Address: ${CONTRACT_ADDRESS}`)
 
@@ -66,6 +67,12 @@ app.use((req, res, next) => {
 // Serve frontend UI
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve dynamic config
+app.get('/config.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.send(`window.EXPLORER_CONFIG = { API_BASE: '${API_BASE_URL}' };`);
 });
 
 // API Documentation
@@ -296,7 +303,10 @@ app.get('/api/accounts/:address/httpusd', async (req, res) => {
     }
 
     const HTTPUSD_DECIMALS = 9;
-    const rawBalance = output?.toString() || '0';
+
+    // Extract the actual value from the Result type
+    const outputJson = output?.toJSON() as any;
+    const rawBalance = (outputJson?.ok !== undefined ? outputJson.ok : output?.toString() || '0').toString();
 
     res.json({
       address,
@@ -421,7 +431,10 @@ app.get('/api/tokens/httpusd', async (req, res) => {
     }
 
     const HTTPUSD_DECIMALS = 9;
-    const totalSupply = output?.toString() || '0';
+
+    // Extract the actual value from the Result type
+    const outputJson = output?.toJSON() as any;
+    const totalSupply = (outputJson?.ok !== undefined ? outputJson.ok : output?.toString() || '0').toString();
 
     res.json({
       name: 'HTTPUSD',
