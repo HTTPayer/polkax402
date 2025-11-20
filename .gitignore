@@ -43,6 +43,7 @@ notes.txt
 .claude/
 
 docs/
+!docs/deploy-contract.md
 
 deploy-akash.yaml
 docker-compose.yaml
